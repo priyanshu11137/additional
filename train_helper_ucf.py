@@ -134,11 +134,14 @@ class TrainerWithKFold:
                 inputs = inputs.to(self.device)
                 outputs, _ = self.model(inputs)
                 
-                # Ensure torch.sum(outputs) is reduced to a scalar
+                # Sum the outputs to get the predicted count
                 pred_count = torch.sum(outputs).item()
 
-                # Ensure count is already a scalar (length of keypoints in validation)
-                gt_count = count.item() if isinstance(count, torch.Tensor) else count[0]
+                # Ensure `count` represents the actual number of people, derived from the length of keypoints
+                if isinstance(count, torch.Tensor):
+                    gt_count = count.sum().item()  # The sum of all elements in `count` gives the number of people
+                else:
+                    gt_count = len(count)  # In case `count` is a list of keypoints
 
                 # Calculate the error
                 res = gt_count - pred_count
@@ -149,6 +152,7 @@ class TrainerWithKFold:
         mae = np.mean(np.abs(epoch_res))
         
         return mae, mse
+
 
 
     def save_model(self, epoch, is_best=False):
