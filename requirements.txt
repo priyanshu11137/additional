@@ -1,0 +1,7 @@
+numpy<2
+scipy
+opencv-python
+gdown
+pillow
+gradio
+sklearn
